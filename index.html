@@ -9,7 +9,299 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vollkorn:ital,wght@0,500;0,700;0,900;1,500&family=Golos+Text:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css">
+<style>
+/* «Записки из города вечной весны» — стили
+   Палитра «вечная весна»: чернила + нефрит + золото, печать-логотип монохром */
+
+:root{
+  --bg:#0B0D10; --txt:#F4F6F3; --muted:rgba(244,246,243,.6);
+  --jade:#7ED9B4; --jade-deep:#2FA07A; --gold:#EFC57F;
+  --glass:rgba(18,22,24,.42); --glass-strong:rgba(14,17,19,.72);
+  --stroke:rgba(255,255,255,.16); --stroke-soft:rgba(255,255,255,.09);
+  --hl:rgba(255,255,255,.28);
+  --on-glass:#F4F6F3; --on-glass-muted:rgba(244,246,243,.62);
+  --danger:#E0705C;
+}
+[data-theme="light"]{
+  --bg:#E9EDEA; --txt:#141D18; --muted:rgba(20,29,24,.6);
+  --jade:#1F8A66; --jade-deep:#166B4E; --gold:#B07E2E;
+  --glass:rgba(255,255,255,.5); --glass-strong:rgba(255,255,255,.85);
+  --stroke:rgba(255,255,255,.65); --stroke-soft:rgba(20,29,24,.08);
+  --hl:rgba(255,255,255,.9);
+  --on-glass:#141D18; --on-glass-muted:rgba(20,29,24,.62);
+  --danger:#B23A22;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-snap-type:y mandatory}
+body{
+  background:var(--bg);color:var(--txt);
+  font-family:"Golos Text",system-ui,sans-serif;font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--jade);outline-offset:2px}
+img{display:block}
+
+/* ============ liquid glass ============ */
+.lg{
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(22px) saturate(170%);
+  backdrop-filter:blur(22px) saturate(170%);
+  border:1px solid var(--stroke);
+  box-shadow:inset 0 1px 0 var(--hl), 0 12px 32px rgba(0,0,0,.28);
+  border-radius:24px;
+}
+
+/* ============ top bar ============ */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;justify-content:center;pointer-events:none}
+.topbar .inner{
+  pointer-events:auto;margin:12px 14px 0;width:100%;max-width:470px;
+  display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:999px;
+}
+.seal{
+  width:36px;height:36px;border-radius:10px;background:var(--txt);color:var(--bg);
+  font-family:"Noto Serif SC",serif;font-weight:900;font-size:12px;line-height:1.05;
+  display:grid;place-items:center;transform:rotate(-3deg);flex:0 0 auto;
+  transition:background .3s,color .3s;
+}
+.apptitle{flex:1;min-width:0}
+.apptitle .t{font-family:"Vollkorn",serif;font-weight:700;font-size:14.5px;color:var(--on-glass);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apptitle .s{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--on-glass-muted)}
+.pill{
+  display:flex;align-items:center;gap:6px;border-radius:999px;padding:7px 11px;
+  font-size:12.5px;font-weight:600;color:var(--on-glass);
+  background:rgba(255,255,255,.08);border:1px solid var(--stroke-soft);white-space:nowrap;
+}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--jade)}
+.round{
+  width:36px;height:36px;border-radius:50%;border:1px solid var(--stroke-soft);
+  background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:14.5px;
+  transition:transform .15s;flex:0 0 auto;color:var(--on-glass);
+}
+.round:active{transform:scale(.9)}
+.round.avatar{font-family:"Vollkorn",serif;font-weight:700;font-size:14px}
+.round.avatar.in{background:var(--jade);color:#08110D;border-color:transparent}
+
+.chipsbar{position:fixed;top:70px;left:0;right:0;z-index:40;display:flex;justify-content:center;pointer-events:none}
+.chipsbar .inner{
+  pointer-events:auto;display:flex;gap:8px;overflow-x:auto;max-width:470px;width:100%;
+  padding:4px 16px;scrollbar-width:none;
+}
+.chipsbar .inner::-webkit-scrollbar{display:none}
+.chip{
+  flex:0 0 auto;border-radius:999px;padding:8px 15px;font-size:13px;font-weight:500;
+  color:var(--on-glass);border:1px solid var(--stroke-soft);
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:inset 0 1px 0 var(--hl);transition:all .2s;
+}
+.chip.on{background:var(--jade);border-color:transparent;color:#08110D;font-weight:700}
+
+/* ============ feed ============ */
+.slide{
+  height:100svh;position:relative;scroll-snap-align:start;overflow:hidden;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.slide .bg{position:absolute;inset:0;background:#1a1f22}
+.slide .bg svg,.slide .bg img{width:100%;height:100%;object-fit:cover}
+.slide .fade{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.32) 0%,transparent 26%,transparent 52%,rgba(0,0,0,.55) 100%);
+}
+[data-theme="light"] .slide .fade{
+  background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,transparent 26%,transparent 55%,rgba(0,0,0,.35) 100%);
+}
+.card{
+  position:relative;z-index:2;margin:0 14px calc(24px + env(safe-area-inset-bottom));
+  width:100%;max-width:442px;padding:18px 18px 14px;cursor:pointer;transition:transform .25s;
+}
+.card:active{transform:scale(.985)}
+.cat-tag{
+  display:inline-flex;align-items:center;font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--jade);
+  background:rgba(0,0,0,.25);border:1px solid var(--stroke-soft);border-radius:999px;padding:5px 11px;
+}
+[data-theme="light"] .cat-tag{background:rgba(255,255,255,.35)}
+.card h2{font-family:"Vollkorn",serif;font-weight:900;font-size:27px;line-height:1.08;margin-top:10px;color:var(--on-glass)}
+.card .cn{font-family:"Noto Serif SC",serif;font-size:13px;color:var(--on-glass-muted);font-weight:600;margin-top:3px}
+.card .note{
+  font-family:"Vollkorn",serif;font-style:italic;font-size:14.5px;margin-top:8px;
+  color:var(--on-glass);opacity:.92;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.row{display:flex;align-items:center;gap:8px;margin-top:13px;flex-wrap:wrap}
+.gbtn{
+  display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:9px 14px;
+  font-size:13px;font-weight:600;color:var(--on-glass);
+  background:rgba(255,255,255,.1);border:1px solid var(--stroke-soft);transition:all .2s;
+}
+.gbtn.on{background:var(--jade);color:#08110D;border-color:transparent}
+.gbtn .st{color:var(--gold)}
+.more{
+  margin-left:auto;width:40px;height:40px;border-radius:50%;
+  background:var(--jade);border:none;color:#08110D;font-size:17px;font-weight:700;
+  display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,0,0,.3);
+}
+.swipe-hint{
+  position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:3;
+  color:var(--on-glass-muted);font-size:16px;animation:bob 1.8s ease-in-out infinite;pointer-events:none;
+}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(5px)}}
+.state{
+  height:100svh;display:grid;place-items:center;text-align:center;padding:0 30px;color:var(--muted);
+}
+.state .in{max-width:300px}
+.state h3{font-family:"Vollkorn",serif;color:var(--txt);font-size:20px;margin-bottom:6px}
+
+/* ============ detail ============ */
+.overlay-page{
+  position:fixed;inset:0;z-index:80;background:var(--bg);
+  transform:translateY(103%);transition:transform .38s cubic-bezier(.3,1,.36,1);
+  overflow-y:auto;overscroll-behavior:contain;
+}
+.overlay-page.open{transform:translateY(0)}
+.d-hero{height:46svh;position:relative;overflow:hidden;background:#1a1f22}
+.d-hero svg,.d-hero img{width:100%;height:100%;object-fit:cover}
+.d-hero .fade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.28),transparent 40%,var(--bg) 98%)}
+.d-close{
+  position:absolute;top:calc(14px + env(safe-area-inset-top));left:14px;z-index:2;
+  width:40px;height:40px;border-radius:50%;border:1px solid var(--stroke);
+  background:var(--glass);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  color:var(--on-glass);font-size:16px;display:grid;place-items:center;
+}
+.d-body{max-width:470px;margin:-64px auto 0;padding:0 16px 60px;position:relative;z-index:2}
+.d-head{padding:20px}
+.d-head .cat-tag{background:rgba(255,255,255,.08)}
+.d-head h2{font-family:"Vollkorn",serif;font-weight:900;font-size:29px;line-height:1.08;margin-top:8px;color:var(--on-glass)}
+.d-head .cn{font-family:"Noto Serif SC",serif;color:var(--on-glass-muted);font-weight:600;margin-top:4px;font-size:14px}
+.d-head .rating{margin-top:10px;font-size:14px;color:var(--gold);letter-spacing:2px}
+.d-head .rating span{color:var(--on-glass-muted);letter-spacing:0;margin-left:8px;font-size:13px}
+.d-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.d-sec{margin-top:14px;padding:18px 20px}
+.d-sec h4{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--on-glass-muted);margin-bottom:10px}
+.d-sec .story{font-family:"Vollkorn",serif;font-size:16px;line-height:1.65;color:var(--on-glass)}
+.gallery{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:-4px 0}
+.gallery::-webkit-scrollbar{display:none}
+.gallery img{height:130px;border-radius:14px;flex:0 0 auto}
+.prac{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prac div b{display:block;font-size:12px;color:var(--on-glass-muted);font-weight:500;margin-bottom:2px}
+.prac div{font-size:14px;color:var(--on-glass);font-weight:500}
+.ints{display:flex;gap:8px;flex-wrap:wrap}
+.ints span{font-size:12.5px;font-weight:600;color:var(--jade);border:1px solid var(--stroke-soft);background:rgba(255,255,255,.06);border-radius:999px;padding:6px 12px}
+.rev{padding:12px 0;border-top:1px solid var(--stroke-soft);font-size:14px;color:var(--on-glass)}
+.rev:first-of-type{border-top:none;padding-top:2px}
+.rev b{font-weight:600}
+.rev .rst{color:var(--gold);font-size:12px;letter-spacing:1.5px;margin-left:6px}
+.rev p{margin-top:3px;opacity:.9}
+.rev-form{margin-top:14px}
+.rate{display:flex;gap:8px;font-size:26px;color:var(--stroke);margin-bottom:10px}
+.rate span{cursor:pointer;transition:transform .1s}
+.rate span:active{transform:scale(1.2)}
+.rate span.on{color:var(--gold)}
+.cmt-form{display:flex;gap:8px}
+.cmt-form input{
+  flex:1;border:1px solid var(--stroke-soft);background:rgba(255,255,255,.07);
+  color:var(--on-glass);border-radius:999px;padding:11px 16px;font-family:inherit;font-size:14px;
+}
+.cmt-form input::placeholder,.field input::placeholder{color:var(--on-glass-muted)}
+.send{border:none;background:var(--jade);color:#08110D;border-radius:999px;padding:11px 16px;font-weight:700}
+
+/* ============ шторки (auth / add / profile / поиск) ============ */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:88;opacity:0;pointer-events:none;transition:opacity .3s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:50%;bottom:0;transform:translate(-50%,105%);z-index:90;
+  width:100%;max-width:470px;max-height:88svh;overflow-y:auto;
+  background:var(--glass-strong);
+  -webkit-backdrop-filter:blur(28px) saturate(170%);backdrop-filter:blur(28px) saturate(170%);
+  border:1px solid var(--stroke);border-bottom:none;border-radius:26px 26px 0 0;
+  box-shadow:inset 0 1px 0 var(--hl), 0 -12px 48px rgba(0,0,0,.4);
+  padding:10px 20px calc(26px + env(safe-area-inset-bottom));
+  transition:transform .34s cubic-bezier(.3,1,.36,1);
+}
+.sheet.open{transform:translate(-50%,0)}
+.grab{width:44px;height:5px;border-radius:3px;background:var(--stroke);margin:6px auto 14px}
+.sheet h3{font-family:"Vollkorn",serif;font-size:21px;font-weight:700;color:var(--on-glass)}
+.sheet .sub{font-size:13px;color:var(--on-glass-muted);margin:4px 0 14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12.5px;color:var(--on-glass-muted);font-weight:500;margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid var(--stroke-soft);background:rgba(255,255,255,.07);
+  color:var(--on-glass);border-radius:14px;padding:12px 14px;font-family:inherit;font-size:14.5px;
+}
+.field textarea{resize:vertical;min-height:74px}
+[data-theme="light"] .field input,[data-theme="light"] .field select,[data-theme="light"] .field textarea,
+[data-theme="light"] .cmt-form input{background:rgba(255,255,255,.7)}
+.btn-main{
+  width:100%;margin-top:6px;border:none;background:var(--jade);color:#08110D;
+  border-radius:16px;padding:14px;font-weight:700;font-size:15.5px;
+}
+.btn-ghost{
+  width:100%;margin-top:10px;border:1px solid var(--stroke-soft);background:none;
+  color:var(--on-glass-muted);border-radius:16px;padding:12px;font-weight:600;font-size:14px;
+}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{
+  flex:1;border-radius:999px;padding:10px;font-weight:600;font-size:14px;
+  border:1px solid var(--stroke-soft);background:none;color:var(--on-glass-muted);
+}
+.tabs button.on{background:var(--jade);color:#08110D;border-color:transparent}
+.photo-drop{
+  border:1.5px dashed var(--stroke);border-radius:14px;padding:18px;text-align:center;
+  color:var(--on-glass-muted);font-size:13.5px;cursor:pointer;
+}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px}
+.err{color:var(--danger);font-size:13px;margin-top:8px;display:none}
+
+/* профиль */
+.stat-row{display:flex;gap:10px;margin-bottom:14px}
+.stat{flex:1;padding:14px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid var(--stroke-soft)}
+.stat .n{font-family:"Vollkorn",serif;font-weight:700;font-size:26px;color:var(--on-glass)}
+.stat .l{font-size:12px;color:var(--on-glass-muted)}
+.mini-list{margin-top:4px}
+.mini-item{
+  display:flex;align-items:center;gap:10px;padding:11px 0;
+  border-top:1px solid var(--stroke-soft);font-size:14px;color:var(--on-glass);
+}
+.mini-item:first-child{border-top:none}
+.mini-item .grow{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:11px;font-weight:700;border-radius:999px;padding:4px 9px}
+.badge.pending{background:rgba(239,197,127,.18);color:var(--gold)}
+.badge.published{background:rgba(126,217,180,.16);color:var(--jade)}
+.badge.rejected{background:rgba(224,112,92,.16);color:var(--danger)}
+.mod-btn{border:none;border-radius:999px;padding:7px 12px;font-weight:700;font-size:12.5px}
+.mod-btn.ok{background:var(--jade);color:#08110D}
+.mod-btn.no{background:rgba(224,112,92,.2);color:var(--danger)}
+
+/* поиск */
+.int{
+  border:1px dashed var(--stroke);background:none;color:var(--on-glass-muted);
+  border-radius:999px;padding:7px 13px;font-size:13px;font-weight:500;transition:all .2s;
+}
+.int.on{border-style:solid;border-color:var(--jade);color:var(--jade);background:rgba(126,217,180,.1)}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(16px);z-index:99;
+  padding:11px 20px;border-radius:999px;font-size:13.5px;font-weight:600;color:var(--on-glass);
+  opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* загрузка */
+.spin{
+  width:22px;height:22px;border-radius:50%;border:3px solid var(--stroke);
+  border-top-color:var(--jade);animation:sp 1s linear infinite;display:inline-block;vertical-align:middle;
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-snap-type:none}
+}
+
+</style>
 </head>
 <body>
 
@@ -137,8 +429,609 @@
 <div class="toast lg" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/scenes.js"></script>
-<script src="js/db.js"></script>
-<script src="js/app.js"></script>
+<script>
+// SVG-заглушки для мест без фотографий
+const B='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 930" preserveAspectRatio="xMidYMid slice">';
+const E='</svg>';
+const blur='<filter id="b"><feGaussianBlur stdDeviation="26"/></filter><filter id="b2"><feGaussianBlur stdDeviation="9"/></filter>';
+const scenes={
+  market:B+blur+`<defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#231433"/><stop offset=".55" stop-color="#3A1E3E"/><stop offset="1" stop-color="#160D20"/></linearGradient></defs>
+    <rect width="430" height="930" fill="url(#g1)"/>
+    <g filter="url(#b)"><circle cx="90" cy="300" r="90" fill="#E3557B" opacity=".55"/>
+    <circle cx="330" cy="240" r="110" fill="#8C4FD1" opacity=".5"/>
+    <circle cx="220" cy="470" r="80" fill="#F2A34B" opacity=".45"/>
+    <circle cx="360" cy="560" r="70" fill="#E3557B" opacity=".4"/></g>
+    <g filter="url(#b2)"><circle cx="110" cy="620" r="34" fill="#F26B8A"/><circle cx="185" cy="655" r="27" fill="#F2A34B"/>
+    <circle cx="255" cy="628" r="31" fill="#C75BD1"/><circle cx="325" cy="660" r="24" fill="#F26B8A"/></g>
+    <rect y="700" width="430" height="230" fill="#120A1B" opacity=".8"/>`+E,
+  lake:B+blur+`<defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8FCDD9"/><stop offset=".45" stop-color="#4E9AA6"/><stop offset="1" stop-color="#14343B"/></linearGradient></defs>
+    <rect width="430" height="930" fill="url(#g2)"/>
+    <circle cx="330" cy="180" r="46" fill="#FBEFD4" opacity=".92"/>
+    <g filter="url(#b)"><circle cx="100" cy="420" r="100" fill="#B7E3DC" opacity=".5"/><circle cx="340" cy="520" r="90" fill="#2E6E77" opacity=".6"/></g>
+    <path d="M0 560 Q120 520 220 552 T430 545 V930 H0 Z" fill="#1E4A50"/>
+    <path d="M0 640 Q150 600 280 636 T430 630 V930 H0 Z" fill="#123238"/>
+    <g fill="#FBFDF9"><path d="M120 300 q12 -12 24 0 q-12 -5 -24 0"/><path d="M200 250 q12 -12 24 0 q-12 -5 -24 0"/>
+    <path d="M280 320 q11 -11 22 0 q-11 -5 -22 0"/><path d="M160 380 q10 -10 20 0 q-10 -4 -20 0"/></g>`+E,
+  cafe:B+blur+`<defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2A1D14"/><stop offset="1" stop-color="#120B07"/></linearGradient></defs>
+    <rect width="430" height="930" fill="url(#g3)"/>
+    <g filter="url(#b)"><circle cx="120" cy="260" r="80" fill="#E89B4B" opacity=".5"/><circle cx="330" cy="380" r="95" fill="#B45E2C" opacity=".45"/>
+    <circle cx="200" cy="560" r="75" fill="#E8C07A" opacity=".35"/></g>
+    <g filter="url(#b2)"><circle cx="90" cy="180" r="13" fill="#F2C879" opacity=".9"/><circle cx="160" cy="140" r="9" fill="#F2C879" opacity=".7"/>
+    <circle cx="300" cy="170" r="11" fill="#F2C879" opacity=".8"/><circle cx="360" cy="240" r="8" fill="#F2C879" opacity=".6"/></g>
+    <ellipse cx="215" cy="700" rx="140" ry="26" fill="#000" opacity=".4"/>
+    <circle cx="215" cy="640" r="62" fill="#C0672F"/><ellipse cx="215" cy="640" rx="42" ry="38" fill="#3A1F0F"/>
+    <path d="M245 560 q14 -22 2 -40 M215 552 q14 -22 2 -40" stroke="#F4E8D2" stroke-width="5" fill="none" stroke-linecap="round" opacity=".55"/>`+E,
+  temple:B+blur+`<defs><linearGradient id="g4" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#F0A85C"/><stop offset=".5" stop-color="#C65B41"/><stop offset="1" stop-color="#3A1414"/></linearGradient></defs>
+    <rect width="430" height="930" fill="url(#g4)"/>
+    <circle cx="215" cy="270" r="66" fill="#FBE9C9" opacity=".9"/>
+    <g filter="url(#b)"><circle cx="80" cy="200" r="70" fill="#F5C97E" opacity=".5"/><circle cx="360" cy="330" r="80" fill="#8C2E1E" opacity=".5"/></g>
+    <path d="M60 560 L215 470 L370 560 Z" fill="#4A160F"/>
+    <path d="M30 566 L215 452 L400 566" stroke="#2A0C08" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <rect x="120" y="560" width="190" height="120" fill="#33110B"/>
+    <rect x="188" y="596" width="54" height="84" fill="#1A0805"/>
+    <rect y="680" width="430" height="250" fill="#1F0B07"/>
+    <circle cx="140" cy="620" r="10" fill="#F2B65C"/><circle cx="290" cy="620" r="10" fill="#F2B65C"/>`+E,
+  hills:B+blur+`<defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#CBE4D6"/><stop offset=".5" stop-color="#6FA893"/><stop offset="1" stop-color="#1C3A31"/></linearGradient></defs>
+    <rect width="430" height="930" fill="url(#g5)"/>
+    <g filter="url(#b)"><circle cx="330" cy="180" r="80" fill="#FBFDF9" opacity=".55"/><circle cx="90" cy="320" r="90" fill="#8FC2AC" opacity=".5"/></g>
+    <path d="M-20 480 L120 300 L260 480 Z" fill="#4C7D6B" opacity=".85"/>
+    <path d="M120 540 L280 320 L440 540 Z" fill="#35604F"/>
+    <path d="M-20 620 L100 480 L240 620 Z" fill="#274A3D"/>
+    <path d="M180 660 L320 500 L460 660 Z" fill="#1D3A30"/>
+    <rect y="640" width="430" height="290" fill="#152B23"/>
+    <g filter="url(#b)"><ellipse cx="215" cy="560" rx="180" ry="34" fill="#DFF0E6" opacity=".35"/></g>`+E,
+  night:B+blur+`<defs><linearGradient id="g6" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#0D1024"/><stop offset="1" stop-color="#05070F"/></linearGradient></defs>
+    <rect width="430" height="930" fill="url(#g6)"/>
+    <g fill="#F4F6F3"><circle cx="50" cy="90" r="1.8"/><circle cx="150" cy="60" r="1.5"/><circle cx="260" cy="100" r="2"/><circle cx="370" cy="70" r="1.6"/></g>
+    <g filter="url(#b)"><circle cx="120" cy="430" r="85" fill="#3D62D9" opacity=".5"/><circle cx="320" cy="360" r="80" fill="#D93DA1" opacity=".45"/>
+    <circle cx="230" cy="560" r="75" fill="#2FA07A" opacity=".4"/></g>
+    <rect x="40" y="380" width="70" height="300" fill="#0E1430"/><rect x="130" y="320" width="84" height="360" fill="#131A3D"/>
+    <rect x="236" y="410" width="64" height="270" fill="#0E1430"/><rect x="318" y="300" width="82" height="380" fill="#131A3D"/>
+    <g fill="#F2C879" opacity=".95"><rect x="146" y="340" width="10" height="10"/><rect x="172" y="380" width="10" height="10"/>
+    <rect x="334" y="330" width="10" height="10"/><rect x="360" y="376" width="10" height="10"/><rect x="334" y="430" width="10" height="10"/></g>
+    <g fill="#F26B8A"><rect x="56" y="410" width="10" height="10"/><rect x="252" y="440" width="10" height="10"/></g>
+    <rect y="680" width="430" height="250" fill="#04060C"/>`+E
+};
+
+</script>
+<script>
+// ======================================================
+// db.js — вся работа с Supabase
+// ======================================================
+const SUPA_URL = 'https://myjjctbfcqlxtplwcfre.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15ampjdGJmY3FseHRwbHdjZnJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5NzA4MDksImV4cCI6MjA5ODU0NjgwOX0.nN28KHd-7V1j2w2y7WALhxswxbX0vHgdCNzejVWO5cw';
+
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const DB = {
+
+  /* ---------- auth ---------- */
+  async session() {
+    const { data } = await sb.auth.getSession();
+    return data.session;
+  },
+  onAuth(cb) { sb.auth.onAuthStateChange((_e, s) => cb(s)); },
+
+  async signUp(email, password, name) {
+    const { data, error } = await sb.auth.signUp({
+      email, password, options: { data: { name } }
+    });
+    if (error) throw error;
+    return data;
+  },
+  async signIn(email, password) {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+  },
+  async signOut() { await sb.auth.signOut(); },
+
+  async myProfile() {
+    const s = await this.session();
+    if (!s) return null;
+    const { data } = await sb.from('profiles').select('*').eq('id', s.user.id).single();
+    return data;
+  },
+
+  /* ---------- чтение ---------- */
+  async fetchPlaces() {
+    const { data, error } = await sb.from('places')
+      .select(`*,
+        place_photos ( path, sort ),
+        reviews ( rating, body, user_id, created_at, profiles ( name ) ),
+        likes ( user_id )`)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    (data || []).forEach(p => p.place_photos?.sort((a, b) => a.sort - b.sort));
+    return data || [];
+  },
+
+  async fetchMyVisits() {
+    const s = await this.session();
+    if (!s) return new Set();
+    const { data } = await sb.from('visits').select('place_id');
+    return new Set((data || []).map(v => v.place_id));
+  },
+
+  photoUrl(path) {
+    return `${SUPA_URL}/storage/v1/object/public/photos/${path}`;
+  },
+
+  /* ---------- действия ---------- */
+  async toggleLike(placeId, isLiked, userId) {
+    if (isLiked) {
+      const { error } = await sb.from('likes').delete()
+        .eq('place_id', placeId).eq('user_id', userId);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from('likes').insert({ place_id: placeId, user_id: userId });
+      if (error) throw error;
+    }
+  },
+
+  async toggleVisit(placeId, isVisited, userId) {
+    if (isVisited) {
+      const { error } = await sb.from('visits').delete()
+        .eq('place_id', placeId).eq('user_id', userId);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from('visits').insert({ place_id: placeId, user_id: userId });
+      if (error) throw error;
+    }
+  },
+
+  async saveReview(placeId, userId, rating, body) {
+    const { error } = await sb.from('reviews').upsert(
+      { place_id: placeId, user_id: userId, rating, body },
+      { onConflict: 'place_id,user_id' }
+    );
+    if (error) throw error;
+  },
+
+  /* ---------- добавление места ---------- */
+  async addPlace(fields) {
+    const s = await this.session();
+    const { data, error } = await sb.from('places')
+      .insert({ ...fields, author: s.user.id })
+      .select('id').single();
+    if (error) throw error;
+    return data.id;
+  },
+
+  // сжатие фото на клиенте до ~200 КБ и загрузка в Storage
+  compressPhoto(file, maxSide = 1280, quality = 0.72) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * k);
+        c.height = Math.round(img.height * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(b => b ? resolve(b) : reject(new Error('compress failed')),
+                 'image/jpeg', quality);
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  },
+
+  async uploadPhoto(placeId, file, sort) {
+    const blob = await this.compressPhoto(file);
+    const path = `place_${placeId}/${Date.now()}_${sort}.jpg`;
+    const { error } = await sb.storage.from('photos')
+      .upload(path, blob, { contentType: 'image/jpeg' });
+    if (error) throw error;
+    const { error: e2 } = await sb.from('place_photos')
+      .insert({ place_id: placeId, path, sort });
+    if (e2) throw e2;
+    return path;
+  },
+
+  /* ---------- модерация (админ) ---------- */
+  async moderate(placeId, status) {
+    const { error } = await sb.from('places').update({ status }).eq('id', placeId);
+    if (error) throw error;
+  }
+};
+
+window.DB = DB;
+
+</script>
+<script>
+// ======================================================
+// app.js — экраны и логика
+// ======================================================
+
+/* ---------------- state ---------------- */
+const S = {
+  user: null,          // supabase user
+  profile: null,       // profiles row
+  places: [],          // все видимые места
+  visits: new Set(),   // мои посещения
+  cat: 'all',
+  ints: new Set(),
+  q: '',
+  theme: 'dark',
+  addFiles: []         // фото для нового места
+};
+
+const $ = s => document.querySelector(s);
+const feed = $('#feed');
+
+/* ---------------- helpers ---------------- */
+function esc(t) {
+  return String(t ?? '').replace(/[&<>"']/g,
+    c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function ratingOf(p) {
+  if (!p.reviews?.length) return null;
+  return (p.reviews.reduce((s, r) => s + r.rating, 0) / p.reviews.length);
+}
+function stars(r) { const f = Math.round(r); return '★'.repeat(f) + '☆'.repeat(5 - f); }
+function likedByMe(p) { return !!(S.user && p.likes?.some(l => l.user_id === S.user.id)); }
+function bgOf(p) {
+  if (p.place_photos?.length) return `<img src="${DB.photoUrl(p.place_photos[0].path)}" alt="" loading="lazy">`;
+  return scenes[p.scene] || scenes.hills;
+}
+let toastTimer;
+function toast(t) {
+  const el = $('#toast'); el.textContent = t; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+function needAuth() { if (S.user) return false; openSheet('auth'); return true; }
+
+/* ---------------- sheets ---------------- */
+const sheets = ['auth', 'add', 'profile', 'search'];
+function openSheet(name) {
+  sheets.forEach(n => $('#sh-' + n).classList.toggle('open', n === name));
+  $('#scrim').classList.add('open');
+  if (name === 'profile') renderProfile();
+}
+function closeSheets() {
+  sheets.forEach(n => $('#sh-' + n).classList.remove('open'));
+  $('#scrim').classList.remove('open');
+}
+$('#scrim').onclick = closeSheets;
+
+/* ---------------- feed ---------------- */
+function visiblePlaces() {
+  return S.places.filter(p => {
+    if (p.status !== 'published' &&
+        !(S.user && p.author === S.user.id)) return false;
+    if (S.cat !== 'all' && p.cat !== S.cat) return false;
+    if (S.ints.size && ![...S.ints].some(i => (p.ints || []).includes(i))) return false;
+    if (S.q) {
+      const hay = (p.name + ' ' + p.note + ' ' + (p.ints || []).join(' ')).toLowerCase();
+      if (!hay.includes(S.q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderFeed() {
+  const list = visiblePlaces();
+  const published = S.places.filter(p => p.status === 'published');
+  $('#trackNum').textContent =
+    [...S.visits].filter(id => published.some(p => p.id === id)).length + '/' + published.length;
+
+  if (!list.length) {
+    feed.innerHTML = `<div class="state"><div class="in">
+      <h3>Пока пусто</h3>
+      <p>Ничего не нашлось по этим фильтрам — попробуй другие или добавь место первым.</p>
+    </div></div>`;
+    return;
+  }
+  feed.innerHTML = list.map((p, i) => {
+    const r = ratingOf(p), mine = S.user && p.author === S.user.id;
+    return `
+    <section class="slide" data-id="${p.id}">
+      <div class="bg">${bgOf(p)}</div>
+      <div class="fade"></div>
+      <div class="card lg" data-open="${p.id}" role="button" tabindex="0" aria-label="Открыть: ${esc(p.name)}">
+        <span class="cat-tag">${esc(p.cat)}${p.status === 'pending' && mine ? ' · на модерации' : ''}</span>
+        <h2>${esc(p.name)}</h2>
+        <div class="cn">${esc(p.cn)}</div>
+        <p class="note">${esc(p.note)}</p>
+        <div class="row">
+          <button class="gbtn ${likedByMe(p) ? 'on' : ''}" data-like="${p.id}">${likedByMe(p) ? '♥' : '♡'} ${p.likes?.length || 0}</button>
+          <button class="gbtn ${S.visits.has(p.id) ? 'on' : ''}" data-visit="${p.id}">${S.visits.has(p.id) ? '✓ был' : '○ отметить'}</button>
+          <span class="gbtn" style="pointer-events:none"><span class="st">★</span> ${r ? r.toFixed(1) : '—'}</span>
+          <button class="more" data-open="${p.id}" aria-label="Подробнее">→</button>
+        </div>
+      </div>
+      ${i === 0 ? '<div class="swipe-hint">⌄</div>' : ''}
+    </section>`;
+  }).join('');
+}
+
+/* ---------------- detail ---------------- */
+const detail = $('#detail');
+let openId = null;
+
+function openDetail(id) {
+  const p = S.places.find(x => x.id === id);
+  if (!p) return;
+  openId = id;
+  const r = ratingOf(p);
+  const myReview = S.user && p.reviews?.find(x => x.user_id === S.user.id);
+  $('#dHeroArt').innerHTML = bgOf(p);
+  $('#dBody').innerHTML = `
+    <div class="d-head lg">
+      <span class="cat-tag">${esc(p.cat)}</span>
+      <h2>${esc(p.name)}</h2>
+      <div class="cn">${esc(p.cn)}</div>
+      <div class="rating">${r ? stars(r) : '☆☆☆☆☆'}<span>${r ? r.toFixed(1) + ' · ' + p.reviews.length + ' оценок' : 'ещё нет оценок'}</span></div>
+      <div class="d-actions">
+        <button class="gbtn ${likedByMe(p) ? 'on' : ''}" data-like="${p.id}">${likedByMe(p) ? '♥' : '♡'} ${p.likes?.length || 0}</button>
+        <button class="gbtn ${S.visits.has(p.id) ? 'on' : ''}" data-visit="${p.id}">${S.visits.has(p.id) ? '✓ я был здесь' : '○ отметить в трекере'}</button>
+      </div>
+    </div>
+    ${p.place_photos?.length > 1 ? `
+    <div class="d-sec lg"><h4>фото</h4><div class="gallery">
+      ${p.place_photos.map(f => `<img src="${DB.photoUrl(f.path)}" alt="" loading="lazy">`).join('')}
+    </div></div>` : ''}
+    ${p.story ? `<div class="d-sec lg"><h4>от автора</h4><p class="story">${esc(p.story)}</p></div>` : ''}
+    <div class="d-sec lg"><h4>практично</h4>
+      <div class="prac">
+        <div><b>адрес</b>${esc(p.addr) || '—'}</div><div><b>как добраться</b>${esc(p.metro) || '—'}</div>
+        <div><b>когда идти</b>${esc(p.time_hint) || '—'}</div><div><b>деньги</b>${esc(p.price) || '—'}</div>
+      </div>
+    </div>
+    ${p.ints?.length ? `<div class="d-sec lg"><h4>подойдёт, если любишь</h4>
+      <div class="ints">${p.ints.map(i => '<span>' + esc(i) + '</span>').join('')}</div></div>` : ''}
+    <div class="d-sec lg"><h4>отзывы · ${p.reviews?.length || 0}</h4>
+      ${(p.reviews || []).map(rv => `
+        <div class="rev"><b>${esc(rv.profiles?.name || 'читатель')}</b><span class="rst">${'★'.repeat(rv.rating)}</span>
+        ${rv.body ? `<p>${esc(rv.body)}</p>` : ''}</div>`).join('')
+        || '<div class="rev" style="color:var(--on-glass-muted)">Пока нет отзывов — будь первым.</div>'}
+      <div class="rev-form">
+        <div class="rate" id="rate">${[1,2,3,4,5].map(v =>
+          `<span data-v="${v}" class="${myReview && v <= myReview.rating ? 'on' : ''}">★</span>`).join('')}</div>
+        <div class="cmt-form">
+          <input id="revBody" placeholder="${myReview ? 'Обновить отзыв…' : 'Поделиться впечатлением…'}"
+                 value="${esc(myReview?.body || '')}" aria-label="Отзыв">
+          <button class="send" id="revSend">→</button>
+        </div>
+      </div>
+    </div>`;
+  detail.classList.add('open');
+  detail.scrollTop = 0;
+
+  let newRating = myReview?.rating || 0;
+  $('#rate').onclick = e => {
+    const s = e.target.closest('span'); if (!s) return;
+    newRating = +s.dataset.v;
+    document.querySelectorAll('#rate span').forEach(x =>
+      x.classList.toggle('on', +x.dataset.v <= newRating));
+  };
+  $('#revSend').onclick = async () => {
+    if (needAuth()) return;
+    if (!newRating) { toast('Поставь оценку звёздами'); return; }
+    try {
+      await DB.saveReview(p.id, S.user.id, newRating, $('#revBody').value.trim());
+      toast('Отзыв сохранён ✓');
+      await reload(); openDetail(p.id);
+    } catch (err) { toast('Не получилось: ' + err.message); }
+  };
+}
+$('#dClose').onclick = () => { detail.classList.remove('open'); openId = null; };
+
+/* ---------------- клики по ленте/детальной ---------------- */
+document.body.addEventListener('click', async e => {
+  const like = e.target.closest('[data-like]'),
+        visit = e.target.closest('[data-visit]'),
+        open = e.target.closest('[data-open]');
+  if (like) {
+    e.stopPropagation();
+    if (needAuth()) return;
+    const id = +like.dataset.like, p = S.places.find(x => x.id === id);
+    try {
+      await DB.toggleLike(id, likedByMe(p), S.user.id);
+      await reload(); if (openId) openDetail(openId);
+    } catch (err) { toast('Ошибка: ' + err.message); }
+    return;
+  }
+  if (visit) {
+    e.stopPropagation();
+    if (needAuth()) return;
+    const id = +visit.dataset.visit;
+    try {
+      await DB.toggleVisit(id, S.visits.has(id), S.user.id);
+      S.visits.has(id) ? S.visits.delete(id) : S.visits.add(id);
+      toast(S.visits.has(id) ? 'Отмечено в трекере ✓' : 'Отметка снята');
+      renderFeed(); if (openId) openDetail(openId);
+    } catch (err) { toast('Ошибка: ' + err.message); }
+    return;
+  }
+  if (open) openDetail(+open.dataset.open);
+});
+feed.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.dataset.open) openDetail(+e.target.dataset.open);
+});
+
+/* ---------------- фильтры / поиск ---------------- */
+$('#chips').addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  document.querySelectorAll('#chips .chip').forEach(x => x.classList.remove('on'));
+  c.classList.add('on'); S.cat = c.dataset.cat;
+  renderFeed(); window.scrollTo(0, 0);
+});
+$('#searchBtn').onclick = () => openSheet('search');
+$('#qInput').addEventListener('input', e => { S.q = e.target.value.trim().toLowerCase(); renderFeed(); });
+$('#intChips').addEventListener('click', e => {
+  const c = e.target.closest('.int'); if (!c) return;
+  c.classList.toggle('on');
+  const v = c.dataset.int;
+  S.ints.has(v) ? S.ints.delete(v) : S.ints.add(v);
+  renderFeed();
+});
+$('#searchDone').onclick = () => { closeSheets(); window.scrollTo(0, 0); };
+
+/* ---------------- тема ---------------- */
+$('#themeBtn').onclick = () => {
+  S.theme = S.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', S.theme);
+  $('#themeBtn').textContent = S.theme === 'dark' ? '☾' : '☀';
+  localStorage.setItem('theme', S.theme);
+};
+(function initTheme() {
+  const saved = localStorage.getItem('theme');
+  S.theme = saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  document.documentElement.setAttribute('data-theme', S.theme);
+  $('#themeBtn').textContent = S.theme === 'dark' ? '☾' : '☀';
+})();
+
+/* ---------------- auth ---------------- */
+let authMode = 'in';
+$('#authTabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  authMode = b.dataset.mode;
+  document.querySelectorAll('#authTabs button').forEach(x => x.classList.toggle('on', x === b));
+  $('#nameField').style.display = authMode === 'up' ? 'block' : 'none';
+  $('#authGo').textContent = authMode === 'up' ? 'Создать аккаунт' : 'Войти';
+});
+$('#authGo').onclick = async () => {
+  const email = $('#authEmail').value.trim(), pass = $('#authPass').value;
+  const errEl = $('#authErr'); errEl.style.display = 'none';
+  if (!email || pass.length < 6) {
+    errEl.textContent = 'Нужны email и пароль от 6 символов';
+    errEl.style.display = 'block'; return;
+  }
+  try {
+    if (authMode === 'up') {
+      await DB.signUp(email, pass, $('#authName').value.trim() || email.split('@')[0]);
+      toast('Аккаунт создан — добро пожаловать!');
+    } else {
+      await DB.signIn(email, pass);
+      toast('С возвращением!');
+    }
+    closeSheets();
+  } catch (err) {
+    errEl.textContent = ({'Invalid login credentials': 'Неверный email или пароль'})[err.message] || err.message;
+    errEl.style.display = 'block';
+  }
+};
+$('#profileBtn').onclick = () => S.user ? openSheet('profile') : openSheet('auth');
+
+DB.onAuth(async session => {
+  S.user = session?.user || null;
+  S.profile = S.user ? await DB.myProfile() : null;
+  const b = $('#profileBtn');
+  b.classList.toggle('in', !!S.user);
+  b.textContent = S.user ? (S.profile?.name || 'Я')[0].toUpperCase() : '⚉';
+  await reload();
+});
+
+/* ---------------- профиль + модерация ---------------- */
+function renderProfile() {
+  const published = S.places.filter(p => p.status === 'published');
+  const mine = S.places.filter(p => S.user && p.author === S.user.id);
+  const myReviews = S.places.reduce((n, p) =>
+    n + (p.reviews?.some(r => r.user_id === S.user?.id) ? 1 : 0), 0);
+  const pending = S.profile?.is_admin
+    ? S.places.filter(p => p.status === 'pending') : [];
+
+  $('#profBody').innerHTML = `
+    <h3>${esc(S.profile?.name || 'Читатель')}</h3>
+    <p class="sub">${S.profile?.is_admin ? 'автор журнала' : 'читатель журнала'}</p>
+    <div class="stat-row">
+      <div class="stat"><div class="n">${[...S.visits].filter(id => published.some(p => p.id === id)).length}<span style="font-size:15px;color:var(--on-glass-muted)"> / ${published.length}</span></div><div class="l">мест посещено</div></div>
+      <div class="stat"><div class="n">${myReviews}</div><div class="l">моих отзывов</div></div>
+    </div>
+    ${mine.length ? `<h4 style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--on-glass-muted);margin:14px 0 4px">мои места</h4>
+      <div class="mini-list">${mine.map(p => `
+        <div class="mini-item"><span class="grow">${esc(p.name)}</span>
+        <span class="badge ${p.status}">${{pending:'на модерации',published:'опубликовано',rejected:'отклонено'}[p.status]}</span></div>`).join('')}
+      </div>` : ''}
+    ${pending.length ? `<h4 style="font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:16px 0 4px">модерация · ${pending.length}</h4>
+      <div class="mini-list">${pending.map(p => `
+        <div class="mini-item"><span class="grow">${esc(p.name)} <span style="color:var(--on-glass-muted)">· ${esc(p.cat)}</span></span>
+          <button class="mod-btn ok" data-mod-ok="${p.id}">принять</button>
+          <button class="mod-btn no" data-mod-no="${p.id}">✕</button>
+        </div>`).join('')}
+      </div>` : ''}
+    <button class="btn-ghost" id="signOut">Выйти из аккаунта</button>`;
+
+  $('#signOut').onclick = async () => { await DB.signOut(); closeSheets(); toast('Ты вышел из аккаунта'); };
+  $('#profBody').onclick = async e => {
+    const ok = e.target.closest('[data-mod-ok]'), no = e.target.closest('[data-mod-no]');
+    if (!ok && !no) return;
+    try {
+      await DB.moderate(+((ok || no).dataset.modOk || (ok || no).dataset.modNo),
+                        ok ? 'published' : 'rejected');
+      toast(ok ? 'Опубликовано ✓' : 'Отклонено');
+      await reload(); renderProfile();
+    } catch (err) { toast('Ошибка: ' + err.message); }
+  };
+}
+
+/* ---------------- добавить место ---------------- */
+$('#fabAdd').onclick = () => { if (needAuth()) return; openSheet('add'); };
+$('#addPhotoDrop').onclick = () => $('#addPhotoInput').click();
+$('#addPhotoInput').addEventListener('change', e => {
+  S.addFiles = [...e.target.files].slice(0, 5);
+  $('#addThumbs').innerHTML = S.addFiles.map(f =>
+    `<img src="${URL.createObjectURL(f)}" alt="">`).join('');
+  $('#addPhotoDrop').textContent = S.addFiles.length
+    ? `Выбрано фото: ${S.addFiles.length} (до 5)` : '📷 Выбрать фото с телефона';
+});
+$('#addGo').onclick = async () => {
+  if (needAuth()) return;
+  const name = $('#addName').value.trim();
+  if (!name) { toast('Дай месту название'); return; }
+  const btn = $('#addGo');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> публикуем…';
+  try {
+    const id = await DB.addPlace({
+      name,
+      cn: $('#addCn').value.trim(),
+      cat: $('#addCat').value,
+      note: $('#addNote').value.trim(),
+      story: $('#addStory').value.trim(),
+      addr: $('#addAddr').value.trim(),
+      ints: [...document.querySelectorAll('#addInts .int.on')].map(b => b.dataset.int)
+    });
+    for (let i = 0; i < S.addFiles.length; i++) {
+      btn.innerHTML = `<span class="spin"></span> фото ${i + 1}/${S.addFiles.length}…`;
+      await DB.uploadPhoto(id, S.addFiles[i], i);
+    }
+    closeSheets();
+    toast('Отправлено автору на модерацию ✓');
+    ['addName','addCn','addNote','addStory','addAddr'].forEach(x => $('#' + x).value = '');
+    S.addFiles = []; $('#addThumbs').innerHTML = '';
+    $('#addPhotoDrop').textContent = '📷 Выбрать фото с телефона';
+    document.querySelectorAll('#addInts .int').forEach(b => b.classList.remove('on'));
+    await reload();
+  } catch (err) { toast('Не получилось: ' + err.message); }
+  btn.disabled = false; btn.textContent = 'Опубликовать место';
+};
+$('#addInts').addEventListener('click', e => {
+  const c = e.target.closest('.int'); if (c) c.classList.toggle('on');
+});
+
+/* ---------------- загрузка данных ---------------- */
+async function reload() {
+  try {
+    [S.places, S.visits] = await Promise.all([DB.fetchPlaces(), DB.fetchMyVisits()]);
+    renderFeed();
+  } catch (err) {
+    feed.innerHTML = `<div class="state"><div class="in">
+      <h3>Не удалось загрузить</h3><p>${esc(err.message)}. Проверь интернет и обнови страницу.</p>
+    </div></div>`;
+  }
+}
+
+feed.innerHTML = `<div class="state"><div class="in"><span class="spin"></span><p style="margin-top:12px">Загружаю город…</p></div></div>`;
+reload();
+
+</script>
 </body>
 </html>
