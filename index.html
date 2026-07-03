@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Записки из города вечной весны — Куньмин глазами местного</title>
+<meta name="description" content="Авторский гид по Куньмину и Юньнани для русскоязычных: места, истории, трекер посещений.">
+<meta name="theme-color" content="#0B0D10">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vollkorn:ital,wght@0,500;0,700;0,900;1,500&family=Golos+Text:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ===== верхняя панель ===== -->
+<div class="topbar"><div class="inner lg">
+  <div class="seal">昆<br>明</div>
+  <div class="apptitle">
+    <div class="t">Записки из города вечной весны</div>
+    <div class="s">куньмин · юньнань</div>
+  </div>
+  <div class="pill" id="trackPill"><span class="dot"></span><span id="trackNum">…</span></div>
+  <button class="round" id="searchBtn" aria-label="Поиск">⌕</button>
+  <button class="round" id="themeBtn" aria-label="Переключить тему">☾</button>
+  <button class="round avatar" id="profileBtn" aria-label="Профиль">⚉</button>
+</div></div>
+
+<!-- ===== категории ===== -->
+<div class="chipsbar"><div class="inner" id="chips">
+  <button class="chip on" data-cat="all">Все</button>
+  <button class="chip" data-cat="рынок">Рынки</button>
+  <button class="chip" data-cat="природа">Природа</button>
+  <button class="chip" data-cat="кафе">Кафе</button>
+  <button class="chip" data-cat="храм">Храмы</button>
+</div></div>
+
+<!-- ===== лента ===== -->
+<main id="feed"></main>
+
+<!-- ===== кнопка добавления ===== -->
+<button class="round lg" id="fabAdd" aria-label="Добавить место"
+  style="position:fixed;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:50;width:56px;height:56px;font-size:24px;border-radius:50%">+</button>
+
+<!-- ===== детальная страница ===== -->
+<div class="overlay-page" id="detail">
+  <div class="d-hero"><div id="dHeroArt"></div><div class="fade"></div>
+    <button class="d-close" id="dClose" aria-label="Назад">←</button>
+  </div>
+  <div class="d-body" id="dBody"></div>
+</div>
+
+<!-- ===== затемнение ===== -->
+<div class="scrim" id="scrim"></div>
+
+<!-- ===== шторка: вход ===== -->
+<div class="sheet" id="sh-auth" role="dialog" aria-label="Вход">
+  <div class="grab"></div>
+  <h3>Своя страница в городе</h3>
+  <p class="sub">Трекер мест, отзывы и свои находки — после входа. Гостям всё видно и так.</p>
+  <div class="tabs" id="authTabs">
+    <button class="on" data-mode="in">Вход</button>
+    <button data-mode="up">Регистрация</button>
+  </div>
+  <div class="field" id="nameField" style="display:none">
+    <label for="authName">Имя</label>
+    <input id="authName" placeholder="Как тебя называть в отзывах" autocomplete="nickname">
+  </div>
+  <div class="field"><label for="authEmail">Email</label>
+    <input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
+  <div class="field"><label for="authPass">Пароль</label>
+    <input id="authPass" type="password" placeholder="минимум 6 символов" autocomplete="current-password"></div>
+  <p class="err" id="authErr"></p>
+  <button class="btn-main" id="authGo">Войти</button>
+</div>
+
+<!-- ===== шторка: добавить место ===== -->
+<div class="sheet" id="sh-add" role="dialog" aria-label="Добавить место">
+  <div class="grab"></div>
+  <h3>Добавить место</h3>
+  <p class="sub">Ты был здесь — расскажи городу. Место появится в ленте после проверки автором.</p>
+  <div class="field"><label for="addName">Название</label>
+    <input id="addName" placeholder="Например: чайная у Зелёного озера"></div>
+  <div class="field"><label for="addCn">Название по-китайски (если знаешь)</label>
+    <input id="addCn" placeholder="选填"></div>
+  <div class="field"><label for="addCat">Категория</label>
+    <select id="addCat">
+      <option value="кафе">Кафе</option><option value="рынок">Рынок</option>
+      <option value="природа">Природа</option><option value="храм">Храм</option>
+    </select></div>
+  <div class="field"><label for="addNote">Одна строка для ленты</label>
+    <input id="addNote" placeholder="Чем это место цепляет"></div>
+  <div class="field"><label for="addStory">История подробнее (необязательно)</label>
+    <textarea id="addStory" placeholder="Как нашёл, что попробовать, когда идти…"></textarea></div>
+  <div class="field"><label for="addAddr">Адрес или ориентир</label>
+    <input id="addAddr" placeholder="Улица, метро, «за углом от…»"></div>
+  <div class="field"><label>Кому подойдёт</label>
+    <div class="ints" id="addInts" style="gap:8px">
+      <button class="int" data-int="кофе">кофе</button>
+      <button class="int" data-int="чай">чай и пуэр</button>
+      <button class="int" data-int="фото-споты">фото-споты</button>
+      <button class="int" data-int="уличная еда">уличная еда</button>
+      <button class="int" data-int="тишина">тишина</button>
+      <button class="int" data-int="ночной город">ночной город</button>
+    </div></div>
+  <div class="field"><label>Фотографии</label>
+    <div class="photo-drop" id="addPhotoDrop">📷 Выбрать фото с телефона</div>
+    <input id="addPhotoInput" type="file" accept="image/*" multiple hidden>
+    <div class="thumbs" id="addThumbs"></div></div>
+  <button class="btn-main" id="addGo">Опубликовать место</button>
+</div>
+
+<!-- ===== шторка: профиль ===== -->
+<div class="sheet" id="sh-profile" role="dialog" aria-label="Профиль">
+  <div class="grab"></div>
+  <div id="profBody"></div>
+</div>
+
+<!-- ===== шторка: поиск ===== -->
+<div class="sheet" id="sh-search" role="dialog" aria-label="Поиск">
+  <div class="grab"></div>
+  <h3>Найти своё место</h3>
+  <p class="sub">По названию или настроению.</p>
+  <div class="field">
+    <input id="qInput" type="search" placeholder="кофе, пуэр, вид на город…" aria-label="Поиск"></div>
+  <div class="ints" id="intChips" style="gap:8px;margin-bottom:16px">
+    <button class="int" data-int="кофе">кофе</button>
+    <button class="int" data-int="чай">чай и пуэр</button>
+    <button class="int" data-int="фото-споты">фото-споты</button>
+    <button class="int" data-int="уличная еда">уличная еда</button>
+    <button class="int" data-int="тишина">тишина</button>
+    <button class="int" data-int="ночной город">ночной город</button>
+  </div>
+  <button class="btn-main" id="searchDone">Показать</button>
+</div>
+
+<div class="toast lg" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/scenes.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
