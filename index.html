@@ -32,6 +32,7 @@
   --danger:#B23A22;
 }
 *{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow-x:hidden;width:100%}
 html{scroll-snap-type:y mandatory}
 body{
   background:var(--bg);color:var(--txt);
@@ -99,7 +100,7 @@ img{display:block}
 
 /* ============ feed ============ */
 .slide{
-  height:100svh;position:relative;scroll-snap-align:start;overflow:hidden;
+  height:100vh;height:100svh;position:relative;scroll-snap-align:start;overflow:hidden;
   display:flex;align-items:flex-end;justify-content:center;
 }
 .slide .bg{position:absolute;inset:0;background:#1a1f22}
@@ -148,7 +149,7 @@ img{display:block}
 }
 @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(5px)}}
 .state{
-  height:100svh;display:grid;place-items:center;text-align:center;padding:0 30px;color:var(--muted);
+  height:100vh;height:100svh;display:grid;place-items:center;text-align:center;padding:0 30px;color:var(--muted);
 }
 .state .in{max-width:300px}
 .state h3{font-family:"Vollkorn",serif;color:var(--txt);font-size:20px;margin-bottom:6px}
@@ -160,7 +161,7 @@ img{display:block}
   overflow-y:auto;overscroll-behavior:contain;
 }
 .overlay-page.open{transform:translateY(0)}
-.d-hero{height:46svh;position:relative;overflow:hidden;background:#1a1f22}
+.d-hero{height:42vh;height:46svh;position:relative;overflow:hidden;background:#1a1f22}
 .d-hero svg,.d-hero img{width:100%;height:100%;object-fit:cover}
 .d-hero .fade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.28),transparent 40%,var(--bg) 98%)}
 .d-close{
@@ -211,7 +212,7 @@ img{display:block}
 .scrim.open{opacity:1;pointer-events:auto}
 .sheet{
   position:fixed;left:50%;bottom:0;transform:translate(-50%,105%);z-index:90;
-  width:100%;max-width:470px;max-height:88svh;overflow-y:auto;
+  width:100%;max-width:470px;max-height:88vh;max-height:88svh;overflow-y:auto;
   background:var(--glass-strong);
   -webkit-backdrop-filter:blur(28px) saturate(170%);backdrop-filter:blur(28px) saturate(170%);
   border:1px solid var(--stroke);border-bottom:none;border-radius:26px 26px 0 0;
@@ -295,6 +296,36 @@ img{display:block}
   border-top-color:var(--jade);animation:sp 1s linear infinite;display:inline-block;vertical-align:middle;
 }
 @keyframes sp{to{transform:rotate(360deg)}}
+
+
+/* ===== адаптация под узкие экраны ===== */
+@media (max-width:430px){
+  .topbar .inner{gap:7px;padding:8px 10px;margin:10px 10px 0}
+  .seal{width:32px;height:32px;font-size:11px;border-radius:9px}
+  .round{width:34px;height:34px;font-size:13.5px}
+  .apptitle .t{font-size:13px}
+  .apptitle .s{display:none}
+  .pill{padding:6px 9px;font-size:11.5px;gap:5px}
+  .chipsbar{top:60px}
+  .chip{padding:7px 13px;font-size:12.5px}
+  .card{margin:0 10px calc(20px + env(safe-area-inset-bottom));padding:15px 15px 12px;border-radius:20px}
+  .card h2{font-size:22px}
+  .card .cn{font-size:12px}
+  .card .note{font-size:13.5px;-webkit-line-clamp:2}
+  .row{gap:6px;margin-top:11px}
+  .gbtn{padding:8px 11px;font-size:12.5px;gap:5px}
+  .more{width:36px;height:36px;font-size:15px}
+  .d-body{padding:0 12px 50px;margin-top:-58px}
+  .d-head h2{font-size:24px}
+  .d-sec{padding:15px 16px}
+  .prac{grid-template-columns:1fr 1fr;gap:10px}
+  #fabAdd{width:52px !important;height:52px !important;right:14px !important}
+}
+@media (max-height:700px){
+  .card h2{font-size:21px}
+  .card .note{display:none}
+  .swipe-hint{display:none}
+}
 
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
